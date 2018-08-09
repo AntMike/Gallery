@@ -13,7 +13,7 @@ public class LoadFiles : MonoBehaviour {
     public GameObject pref;
     public List<Texture> oflineList;
 
-	void Start () {
+    private void Start () {
         string HtmlText = GetHtmlFromUri("http://google.com");
         if (HtmlText == "")
         {
@@ -25,7 +25,7 @@ public class LoadFiles : MonoBehaviour {
         }
     }
 
-    void CreateImage(bool _hasInernetConnection)
+    private void CreateImage(bool _hasInernetConnection)
     {
         parent.GetComponent<GridLayoutGroup>().enabled = true;
 
@@ -38,6 +38,7 @@ public class LoadFiles : MonoBehaviour {
                 parent.GetComponent<RectTransform>().sizeDelta = new Vector3(1, ((LinkBase.Instance.links.Count-1)*400)+100);
                 var go = Instantiate(pref, parent);
                 go.GetComponentInChildren<DragHandeler>().cam = cam;
+                go.GetComponentInChildren<DragHandeler>().parent = go.transform;
                 go.GetComponentInChildren<DragHandeler>().StartCoroutine(go.GetComponentInChildren<DragHandeler>().SetInternetImage(_link));
             }
         }
@@ -54,7 +55,7 @@ public class LoadFiles : MonoBehaviour {
         
     }
 
-    IEnumerator StopGroup()
+    private IEnumerator StopGroup()
     {
         yield return new WaitForSeconds(0.5f);
         parent.GetComponent<GridLayoutGroup>().enabled = false;

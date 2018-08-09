@@ -5,23 +5,21 @@ using UnityEngine.UI;
 
 public class DragHandeler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    Vector3 startPosition;
-    Transform startParent;
+    private Vector3 startPosition;
+    [HideInInspector]
     public Transform parent;
+    [HideInInspector]
     public Camera cam;
-
-    void Start()
-    {
-    }
 
     public IEnumerator SetInternetImage(string _url)
     {
-        WWW www = new WWW(_url);
+        using (WWW www = new WWW(_url))
+        {
 
-        yield return www;
-        //Debug.Log(text = www.);
-        parent.GetComponent<RawImage>().texture = www.texture;
-
+            yield return www;
+            //Debug.Log(text = www.);
+            parent.GetComponent<RawImage>().texture = www.texture;
+        }
     }
 
     public void SetOflineImage(Texture _texture)
@@ -33,9 +31,7 @@ public class DragHandeler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        startPosition = parent.position;
-        startParent = parent.parent;
-        //GetComponent<CanvasGroup>().blocksRaycasts = false;
+        startPosition = parent.localPosition;
     }
 
     #endregion
@@ -54,22 +50,21 @@ public class DragHandeler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEnd
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        //GetComponent<CanvasGroup>().blocksRaycasts = true;
-        if (parent.parent == startParent)
+        parent.localPosition = startPosition;
+        CollisionDetection();
+    }
+
+    private void CollisionDetection()
+    {
+        Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+        Debug.DrawRay(cam.ScreenToWorldPoint(Input.mousePosition), Vector3.forward, Color.green);
+        if (Physics.Raycast(ray, out hit, 1000))
         {
-            parent.position = startPosition;
-
-            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            Debug.DrawRay(cam.ScreenToWorldPoint(Input.mousePosition), Vector3.forward,  Color.green);
-            if (Physics.Raycast(ray,out hit,1000))
+            if (hit.collider.tag == "cube")
             {
-                if (hit.collider.tag == "cube")
-                {
-                    hit.collider.gameObject.GetComponent<Cube>().ChangeTexture(parent.GetComponent<RawImage>().texture);
-                }
+                hit.collider.gameObject.GetComponent<Cube>().ChangeTexture(parent.GetComponent<RawImage>().texture);
             }
-
         }
     }
 
